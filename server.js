@@ -13,9 +13,6 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", function(req, res) {
-  res.json(path.join(__dirname, "public/index.html"));
-});
 
 //Reads db.json file and returns contents as JSON
 app.get("/api/notes", (req, res) => {
