@@ -2,6 +2,9 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const app = express();
+const uuid = require('uuid');
+
+allNotesArray = require("./db/db.json");
 
 PORT = process.env.PORT || 3000;
 
@@ -15,23 +18,41 @@ app.get("/api/notes", (req, res) => {
   fs.readFile("./db/db.json", "utf8", (err, data) => {
 
     if (err) throw err;
-
-    res.json((data));
+    
+    res.send(JSON.parse(data));
   })
 });
 
 //Recieves new note and adds it to the db.json file and returns the notes to the client
 app.post("/api/notes", (req, res) => {
-  let newNote = JSON.stringify(req.body);
-  fs.appendFile("./db/db.json", newNote, (err) => {
+  
+  let newNote = req.body;
+  newNote.id = uuid.v4();
+  
+  let notesArray = [...allNotesArray];
+  notesArray.push(newNote);
+
+  fs.writeFile("./db/db.json", JSON.stringify(notesArray), (err) => {
     if (err) throw err;
 
-    res.json(newNote);
+    res.json(notesArray);
   })
 
 });
 
 app.delete("/api/notes/:id", (req, res) => {
+let notes = [...allNotesArray];
+let filter = notes.some(obj => obj.id === req.params.id);
+
+if (filter) {
+  filteredNotes = notes.filter(note => note.id != req.params.id);
+}
+
+fs.writeFile("./db/db.json", JSON.stringify(filteredNotes), (err) => {
+  if (err) throw err;
+
+  res.json(filteredNotes);
+})
 
 });
 
