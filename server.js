@@ -13,7 +13,6 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-
 //Reads db.json file and returns contents as JSON
 app.get("/api/notes", (req, res) => {
   fs.readFile("./db/db.json", "utf8", (err, data) => {
@@ -26,35 +25,37 @@ app.get("/api/notes", (req, res) => {
 
 //Recieves new note and adds it to the db.json file and returns the notes to the client
 app.post("/api/notes", (req, res) => {
+  fs.readFile("./db/db.json", "utf8", (err, data) => {
+    allData = JSON.parse(data);
+    let newNote = req.body;
+    newNote.id = uuid.v4();
 
-  let newNote = req.body;
-  newNote.id = uuid.v4();
+    allData.push(newNote);
 
-  let notesArray = [...allNotesArray];
-  notesArray.push(newNote);
-
-  fs.writeFile("./db/db.json", JSON.stringify(notesArray), (err) => {
+  fs.writeFile("./db/db.json", JSON.stringify(allData), (err) => {
     if (err) throw err;
 
-    res.json(notesArray);
+    res.json(allData);
+    })
   })
-
 });
 
 app.delete("/api/notes/:id", (req, res) => {
-  let notes = [...allNotesArray];
-  let filter = notes.some(obj => obj.id === req.params.id);
+  fs.readFile("./db/db.json", "utf8", (err, data) => {
+    array = JSON.parse(data);
+   
+    let filter = array.some(obj => obj.id === req.params.id);
 
-  if (filter) {
-    filteredNotes = notes.filter(note => note.id != req.params.id);
-  }
+    if (filter) {
+      filteredNotes = array.filter(note => note.id != req.params.id);
+    }
 
-  fs.writeFile("./db/db.json", JSON.stringify(filteredNotes), (err) => {
-    if (err) throw err;
+    fs.writeFile("./db/db.json", JSON.stringify(filteredNotes), (err) => {
+      if (err) throw err;
 
-    res.json(filteredNotes);
+      res.json(filteredNotes);
+    })
   })
-
 });
 
 app.listen(PORT, () => {
